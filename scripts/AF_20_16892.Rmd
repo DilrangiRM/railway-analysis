@@ -1,0 +1,174 @@
+---
+title: "Assignment"
+author: "AF/20/16892"
+date: "2025-01-04"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+library(tidyverse)
+
+# Load the railway dataset
+Railway_data <- read.csv("C:/Users/dilra/Documents/railway-analysis/data/railway.csv", 
+                         header = TRUE)
+head(Railway_data )
+str(Railway_data)
+
+
+#SECTION 01: DATA PREPARING AND CLEANING
+---------------------------------------------------------------------
+
+##Confirm that the dataset is loaded correctly.
+head(Railway_data )
+tail(Railway_data )
+dim(Railway_data )
+summary(Railway_data)
+
+##Check for missing values
+sum(is.na(Railway_data))
+colSums(is.na(Railway_data))
+
+##Handle missing values(replace empty strings to NA )
+Railway_data$Reason.for.Delay[Railway_data$Reason.for.Delay == ""] <- NA
+Railway_data$Reason.for.Delay <- droplevels(Railway_data$Reason.for.Delay)
+
+##convert to valide data types
+Railway_data$Purchase.Type <- as.factor(Railway_data$Purchase.Type)
+Railway_data$Payment.Method <- as.factor(Railway_data$Payment.Method)
+Railway_data$Ticket.Type <- as.factor(Railway_data$Ticket.Type)
+Railway_data$Railcard <- as.factor(Railway_data$Railcard)
+Railway_data$Date.of.Purchase <- as.Date(Railway_data$Date.of.Purchase, format = "%Y-%m-%d")
+Railway_data$Date.of.Journey <- as.Date(Railway_data$Date.of.Journey, format = "%Y-%m-%d")
+Railway_data$Arrival.Time <- as.POSIXct(Railway_data$Arrival.Time, format = "%H:%M:%S")
+Railway_data$Departure.Time <- as.POSIXct(Railway_data$Departure.Time, format = "%H:%M:%S")
+Railway_data$Actual.Arrival.Time <-as.POSIXct(Railway_data$Actual.Arrival.Time, format = "%H:%M:%S")
+Railway_data$Time.of.Purchase <- as.POSIXct(Railway_data$Time.of.Purchase, format = "%H:%M:%S")
+Railway_data$Reason.for.Delay <- as.factor(Railway_data$Reason.for.Delay)
+
+
+
+##ensure structure after convert
+str(Railway_data)
+
+
+#SECTION 02: UNDERSTANDING KEY VARIABLE
+---------------------------------------------------------------------
+
+##display summary table for Analyze Purchase Type, Payment Method, and Ticket Type
+summary_table <- lapply(Railway_data[, c("Purchase.Type", "Payment.Method", "Ticket.Type")], 
+                        function(x) table(x, useNA = "ifany"))
+print(summary_table)
+
+library(ggplot2)
+##use bar chart-easy to comparison,represent counts of catogories &  visualize distribution patterns
+
+###Purchase Type bar
+ggplot(Railway_data, aes(x = Purchase.Type)) +
+  geom_bar(fill = "deeppink4") +
+  labs(
+    title = "DISTRIBUTION OF PURCHASE TYPE",
+    x = "Purchase Type",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    axis.title = element_text(size = 14), 
+    axis.text = element_text(size = 12), 
+    panel.grid.major = element_line(color = "gray75"), 
+    panel.grid.minor = element_blank()  
+  )
+  
+###Payment Method bar
+ggplot(Railway_data, aes(x = Payment.Method)) +
+  geom_bar(fill = "lightskyblue") +
+  labs(
+    title = "DISTRIBUTION OF PAYMENT METHOD", 
+    x = "Payment Method", 
+    y = "Count"
+    )+
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    axis.title = element_text(size = 14), 
+    axis.text = element_text(size = 12), 
+    panel.grid.major = element_line(color = "gray75"), 
+    panel.grid.minor = element_blank()  
+  )
+  
+### Ticket Type bar
+ggplot(Railway_data, aes(x = Ticket.Type)) +
+  geom_bar(fill = "turquoise4") +
+  labs(
+  title = "DISTRIBUTION OF TICKET TYPE",
+  x = "Ticket Type", 
+  y = "Count"
+  )+
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"), 
+    axis.title = element_text(size = 14), 
+    axis.text = element_text(size = 12), 
+    panel.grid.major = element_line(color = "gray75"), 
+    panel.grid.minor = element_blank()  
+  )
+  
+
+  
+#SECTIO 03: DELAY JOURNEYS ANALYSIS
+-------------------------------------------------------------------- 
+
+##Filter only delayed journeys.
+delayed_journeys <- subset(Railway_data, Journey.Status == "Delayed")
+delayed_journeys$Day.of.Week <- weekdays(delayed_journeys$Date.of.Journey)
+daywise_delay <- table(delayed_journeys$Day.of.Week)
+
+##use bar chart-easy to identify distributions of delay based on day of the week &  Reason
+
+###delays based on the day of the week
+ggplot(delayed_journeys, aes(x = Day.of.Week)) +
+  geom_bar(fill = "darkgreen") +
+  labs(
+    title = "DELAY BASED ON DAY OF THE WEEK", 
+    x = "Day of the Week", 
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),  # Center and bold the title
+    axis.title = element_text(size = 14), 
+    axis.text = element_text(size = 12),  
+    axis.text.x = element_text(angle = 45, hjust = 1),  
+    panel.grid.major = element_line(color = "gray75"), 
+    panel.grid.minor = element_blank()  
+  )
+  
+
+###delays based on the Reason 
+ggplot(delayed_journeys, aes(x = Reason.for.Delay)) +
+  geom_bar(fill = "springgreen3") +
+  labs(
+    title = "DELAY BASED ON THE REASON OF DELAY", 
+    x = "Delay Reasons", 
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),  # Center and bold the title
+    axis.title = element_text(size = 14),  
+    axis.text = element_text(size = 12),  
+    axis.text.x = element_text(angle = 45, hjust = 1),  
+    panel.grid.major = element_line(color = "gray75"),  
+    panel.grid.minor = element_blank()  
+  )
+  
+p1 <- ggplot(Railway_data, aes(x = Purchase.Type)) + 
+  geom_bar(fill = "deeppink4") + 
+  labs(title = "DISTRIBUTION OF PURCHASE TYPE")
+  
+ 

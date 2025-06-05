@@ -1,0 +1,36 @@
+### [1] R ENVIRONMENT FILES ###
+# Prevents RStudio temporary files from being tracked
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+
+### [2] RAW DATA PROTECTION ###
+# Ensures original data files aren't uploaded (privacy/space)
+data/*
+!data/.gitkeep  # Keeps folder structure
+
+### [3] OUTPUT MANAGEMENT ###
+# Allows only sample outputs to be committed
+outputs/figures/*
+!outputs/figures/sample_*.png  # Whitelist sample visuals
+
+outputs/processed_data/*  # Exclude all processed data
+outputs/reports/*
+!outputs/reports/sample_report.html  # Allow one sample report
+
+### [4] SYSTEM ARTIFACTS ###
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+### [5] NOTEBOOK CACHE ###
+# Jupyter/Notebook intermediates
+.ipynb_checkpoints/
+*.ipynb.meta
+
+### [6] PACKAGE SPECIFIC ###
+# renv environment (if used)
+renv/
+renv.lock
